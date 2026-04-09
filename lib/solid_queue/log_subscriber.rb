@@ -57,7 +57,7 @@ class SolidQueue::LogSubscriber < ActiveSupport::LogSubscriber
       debug formatted_event(event, action: "Enqueued recurring task outside Solid Queue", **attributes)
     else
       action = event.payload[:skipped].present? ? "Skipped recurring task – already dispatched" : "Enqueued recurring task"
-      debug formatted_event(event, action: action, **attributes)
+      info formatted_event(event, action: action, **attributes)
     end
   end
 
