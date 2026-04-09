@@ -100,14 +100,17 @@ module SolidQueue
       end
 
       def schedule(task)
-        delay = task.delay_from_now
+        now = Time.current
         nt = task.next_time
-        SolidQueue.logger.info("schedule: #{task.to_s}, delay = #{delay}, next time = #{nt}")
+        diff = (nt - now).to_f
+        delay = task.delay_from_now
+        SolidQueue.logger.info("schedule: #{task.to_s}, delay = #{delay}, next time = #{nt} (now = #{now}, diff = #{diff})")
         
         scheduled_task = Concurrent::ScheduledTask.new(delay, args: [ self, task, nt ]) do |thread_schedule, thread_task, thread_task_run_at|
           thread_schedule.schedule_task(thread_task)
 
           wrap_in_app_executor do
+            # Note: thread_task_run_at is respected by RecurringExecution.record, but ignored by Job.enqueue!
             thread_task.enqueue(at: thread_task_run_at)
           end
         end
