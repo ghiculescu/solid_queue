@@ -100,7 +100,11 @@ module SolidQueue
       end
 
       def schedule(task)
-        scheduled_task = Concurrent::ScheduledTask.new(task.delay_from_now, args: [ self, task, task.next_time ]) do |thread_schedule, thread_task, thread_task_run_at|
+        delay = task.delay_from_now
+        nt = task.next_time
+        SolidQueue.logger.info("schedule: #{task.to_s}, delay = #{delay}, next time = #{nt}")
+        
+        scheduled_task = Concurrent::ScheduledTask.new(delay, args: [ self, task, nt ]) do |thread_schedule, thread_task, thread_task_run_at|
           thread_schedule.schedule_task(thread_task)
 
           wrap_in_app_executor do
